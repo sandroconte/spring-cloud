@@ -1,0 +1,25 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: service1-docker
+  datasource:
+    url: jdbc:postgresql://${database.host:localhost}:${database.port:5432}/${database.db:docker-test}
+    username: ${database.user:docker}
+    password: ${database.password:docker}
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQL95Dialect
+        
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${registry.host:localhost}:${registry.port:8761}/eureka

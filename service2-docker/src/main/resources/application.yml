@@ -1,0 +1,14 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: service2-docker
+        
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${registry.host:localhost}:${registry.port:8761}/eureka
+      
+service1:
+  docker:
+    url: http://${service1.host:localhost}:${service1.port:8080}/utentes

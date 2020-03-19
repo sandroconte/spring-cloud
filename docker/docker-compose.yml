@@ -1,0 +1,85 @@
+version: '3.1'
+
+services:
+    gateway:
+        image: 'gw-boot'
+        build:
+            context: ../gw-docker
+            dockerfile: Dockerfile
+            args:
+                JAR_FILE: gw-docker-0.0.1-SNAPSHOT.jar
+        ports:
+            - 8050:8050
+        environment:
+            - REGISTRY_HOST=registry
+        networks:
+            - spring-cloud-network 
+        restart: on-failure
+    registry:
+        image: 'eureka-boot'
+        build:
+            context: ../eureka-docker
+            dockerfile: Dockerfile
+            args:
+                JAR_FILE: eureka-docker-0.0.1-SNAPSHOT.jar
+        ports:
+            - 8761:8761
+        networks:
+            - spring-cloud-network
+        restart: on-failure    
+    service1:
+        image: 'service1-boot'
+        build:
+            context: ../service1-docker
+            dockerfile: Dockerfile
+            args:
+                JAR_FILE: service1-docker-0.0.1-SNAPSHOT.jar
+        ports:
+            - 8080
+        environment:
+            - REGISTRY_HOST=registry
+            - DATABASE_HOST=database
+            - DATABASE_DB=docker-test
+            - DATABASE_USER=docker
+            - DATABASE_PASSWORD=docker
+        networks:
+            - spring-cloud-network 
+        depends_on:
+            - database
+        restart: on-failure
+    service2:
+        image: 'service2-boot'
+        build:
+            context: ../service2-docker
+            dockerfile: Dockerfile
+            args:
+                JAR_FILE: service2-docker-0.0.1-SNAPSHOT.jar
+        ports:
+            - 8081
+        environment:
+            - REGISTRY_HOST=registry
+            - SERVICE1_HOST=service1
+            - SERVICE1_PORT=8080
+        networks:
+            - spring-cloud-network 
+        depends_on:
+            - service1
+        restart: on-failure    
+    database:
+        image: postgres:9.6
+        environment:
+            - POSTGRES_USER=docker
+            - POSTGRES_PASSWORD=docker
+            - POSTGRES_DB=docker-test
+        volumes:
+            - db-data:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+        networks:
+            - spring-cloud-network 
+    
+networks:
+    spring-cloud-network:
+volumes:
+    db-data:
+        driver: local
